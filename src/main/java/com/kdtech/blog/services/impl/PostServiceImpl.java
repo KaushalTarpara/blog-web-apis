@@ -18,6 +18,7 @@ import com.kdtech.blog.entities.Post;
 import com.kdtech.blog.entities.User;
 import com.kdtech.blog.exceptions.ResourceNotFoundException;
 import com.kdtech.blog.payloads.PostDto;
+import com.kdtech.blog.payloads.PostResponse;
 import com.kdtech.blog.repositories.CategoryRepo;
 import com.kdtech.blog.repositories.PostRepo;
 import com.kdtech.blog.repositories.UserRepo;
@@ -77,13 +78,21 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
-	public List<PostDto> getAllPost(Integer pageNumber, Integer pageSize) {
+	public PostResponse getAllPost(Integer pageNumber, Integer pageSize) {
 		Pageable p = PageRequest.of(pageNumber, pageSize);
 		Page<Post> pagePost = this.postRepo.findAll(p);
 		List<Post> allPosts = pagePost.getContent();
 		List<PostDto> postDtos = allPosts.stream().
 				map((post)-> this.modelMapper.map(post,PostDto.class)).collect(Collectors.toList());
-		return postDtos;
+		
+		PostResponse postResponse = new PostResponse();
+		postResponse.setPosts(postDtos);
+		postResponse.setPageNumber(pagePost.getNumber());
+		postResponse.setPageSize(pagePost.getSize());
+		postResponse.setTotalElements(pagePost.getTotalElements());
+		postResponse.setTotalPages(pagePost.getTotalPages());
+		postResponse.setLastPage(pagePost.isLast());
+		return postResponse;
 	}
 
 	@Override
